@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coleta de Dados - TI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #e8eaf6;
+        }
+        .shadow-yellow {
+            box-shadow: 2px 2px 8px rgba(255, 235, 59, 0.5);
+        }
+        .table-container {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .notes-container {
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .custom-input {
+            border: 1px solid #9fa8da;
+            border-radius: 8px;
+            padding: 8px;
+            background-color: #ffffff;
+            width: 100%;
+        }
+        .custom-input:focus {
+            outline: none;
+            border-color: #3949ab;
+        }
+        .custom-textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-6">
+    <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8 flex flex-col space-y-6">
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-center text-indigo-900">📋 Registro de Chamados de TI</h1>
+
+        <!-- Form -->
+        <div class="space-y-4">
+            <input id="nome" type="text" class="custom-input" placeholder="👤 Nome do Usuário">
+            <input id="login" type="text" class="custom-input" placeholder="🔐 Login">
+            <div class="flex space-x-4">
+                <input id="andar" type="text" class="custom-input w-1/2" placeholder="🏢 Andar">
+                <input id="ala" type="text" class="custom-input w-1/2" placeholder="📍 Ala">
+            </div>
+            <div class="flex space-x-4">
+                <input id="mesa" type="text" class="custom-input w-1/2" placeholder="💺 Número da Mesa">
+                <input id="ramal" type="text" class="custom-input w-1/2" placeholder="📞 Ramal">
+            </div>
+            <input id="patrimonio" type="text" class="custom-input" placeholder="💻 Patrimônio do Computador">
+            <textarea id="descricao" rows="3" class="custom-input custom-textarea" placeholder="📝 Descrição (opcional)"></textarea>
+            <div class="flex justify-center space-x-4">
+                <button onclick="saveData()" class="bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-800 flex items-center">
+                    <span class="material-icons">save</span> Salvar
+                </button>
+                <button onclick="clearFields()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+                    <span class="material-icons">clear</span> Limpar
+                </button>
+                <button onclick="exportToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <span class="material-icons">file_download</span> Exportar CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Tickets Table -->
+        <div class="mt-6">
+            <h2 class="text-2xl font-bold text-indigo-900">📊 Chamados Registrados</h2>
+            <div class="table-container mt-2 bg-indigo-100 rounded-lg p-4">
+                <table id="tabela-chamados" class="w-full text-sm">
+                    <thead class="bg-blue-200">
+                        <tr class="text-indigo-900 font-bold">
+                            <th class="p-2">Nome</th>
+                            <th class="p-2">Login</th>
+                            <th class="p-2">Andar</th>
+                            <th class="p-2">Ala</th>
+                            <th class="p-2">Mesa</th>
+                            <th class="p-2">Ramal</th>
+                            <th class="p-2">Patrimônio</th>
+                            <th class="p-2">Descrição</th>
+                            <th class="p-2">Data</th>
+                            <th class="p-2">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sticky Notes -->
+        <div class="mt-6">
+            <h2 class="text-2xl font-bold text-indigo-900">📝 Notas Adesivas</h2>
+            <textarea id="nota" rows="3" class="custom-input custom-textarea mt-2" placeholder="📝 Nota Adesiva"></textarea>
+            <div class="flex justify-center space-x-4 mt-2">
+                <button onclick="saveNote()" class="bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center">
+                    <span class="material-icons">save</span> Salvar Nota
+                </button>
+                <button onclick="clearNote()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+                    <span class="material-icons">clear</span> Limpar Nota
+                </button>
+            </div>
+            <div id="notas-view" class="notes-container mt-2 bg-yellow-50 rounded-lg p-4 border border-yellow-200 shadow-yellow"></div>
+        </div>
+    </div>
+
+    <!-- Material Icons for Buttons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script>
+        let editIndex = null;
+        let editNoteIndex = null;
+        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        function updateTable() {
+            const tbody = document.getElementById('tabela-body');
+            tbody.innerHTML = '';
+            tickets.forEach((ticket, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-2">${ticket.Nome}</td>
+                    <td class="p-2">${ticket.Login}</td>
+                    <td class="p-2">${ticket.Andar}</td>
+                    <td class="p-2">${ticket.Ala}</td>
+                    <td class="p-2">${ticket.Mesa}</td>
+                    <td class="p-2">${ticket.Ramal}</td>
+                    <td class="p-2">${ticket.Patrimonio}</td>
+                    <td class="p-2">${ticket.Descricao}</td>
+                    <td class="p-2">${ticket.Data}</td>
+                    <td class="p-2 flex space-x-2">
+                        <button onclick="editData(${index})" class="text-blue-600 hover:text-blue-800" title="Editar chamado">
+                            <span class="material-icons">edit</span>
+                        </button>
+                        <button onclick="deleteData(${index})" class="text-red-600 hover:text-red-800" title="Excluir chamado">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function saveData() {
+            const data = {
+                Nome: document.getElementById('nome').value,
+                Login: document.getElementById('login').value,
+                Andar: document.getElementById('andar').value,
+                Ala: document.getElementById('ala').value,
+                Mesa: document.getElementById('mesa').value,
+                Ramal: document.getElementById('ramal').value,
+                Patrimonio: document.getElementById('patrimonio').value,
+                Descricao: document.getElementById('descricao').value,
+                Data: new Date().toLocaleString('pt-BR')
+            };
+
+            if (editIndex === null) {
+                tickets.push(data);
+                showSnackbar('✅ Dados salvos com sucesso!', 'bg-green-500');
+            } else {
+                tickets[editIndex] = data;
+                showSnackbar('✏️ Dados atualizados com sucesso!', 'bg-green-500');
+                editIndex = null;
+            }
+
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            updateTable();
+            clearFields();
+        }
+
+        function editData(index) {
+            editIndex = index;
+            const ticket = tickets[index];
+            document.getElementById('nome').value = ticket.Nome;
+            document.getElementById('login').value = ticket.Login;
+            document.getElementById('andar').value = ticket.Andar;
+            document.getElementById('ala').value = ticket.Ala;
+            document.getElementById('mesa').value = ticket.Mesa;
+            document.getElementById('ramal').value = ticket.Ramal;
+            document.getElementById('patrimonio').value = ticket.Patrimonio;
+            document.getElementById('descricao').value = ticket.Descricao;
+            showSnackbar(`✏️ Editando registro ${index}`, 'bg-blue-500');
+        }
+
+        function deleteData(index) {
+            tickets.splice(index, 1);
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            updateTable();
+            showSnackbar(`🗑️ Registro ${index} excluído com sucesso!`, 'bg-red-500');
+        }
+
+        function updateNotesView() {
+            const notesView = document.getElementById('notas-view');
+            notesView.innerHTML = '';
+            notes.slice().reverse().forEach((note, idx) => {
+                const actualIdx = notes.length - 1 - idx;
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'bg-yellow-100 p-3 rounded-lg mb-2 border border-yellow-300';
+                noteDiv.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-600">${note.timestamp}</span>
+                        <div class="flex space-x-2">
+                            <button onclick="editNote(${actualIdx})" class="text-blue-600 hover:text-blue-800" title="Editar nota">
+                                <span class="material-icons">edit</span>
+                            </button>
+                            <button onclick="deleteNote(${actualIdx})" class="text-red-600 hover:text-red-800" title="Excluir nota">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm">${note.text}</p>
+                `;
+                notesView.appendChild(noteDiv);
+            });
+        }
+
+        function saveNote() {
+            const noteText = document.getElementById('nota').value.trim();
+            if (!noteText) {
+                showSnackbar('⚠️ O campo de nota está vazio.', 'bg-red-500');
+                return;
+            }
+            if (editNoteIndex === null) {
+                notes.push({ timestamp: new Date().toLocaleString('pt-BR'), text: noteText });
+                showSnackbar('✅ Nota salva com sucesso!', 'bg-green-500');
+            } else {
+                notes[editNoteIndex].text = noteText;
+                showSnackbar('✏️ Nota atualizada com sucesso!', 'bg-green-500');
+                editNoteIndex = null;
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            updateNotesView();
+            clearNote();
+        }
+
+        function editNote(index) {
+            editNoteIndex = index;
+            document.getElementById('nota').value = notes[index].text;
+            showSnackbar(`✏️ Editando nota criada em ${notes[index].timestamp}`, 'bg-blue-500');
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            updateNotesView();
+            showSnackbar('🗑️ Nota excluída com sucesso!', 'bg-red-500');
+        }
+
+        function clearFields() {
+            editIndex = null;
+            ['nome', 'login', 'andar', 'ala', 'mesa', 'ramal', 'patrimonio', 'descricao'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        function clearNote() {
+            editNoteIndex = null;
+            document.getElementById('nota').value = '';
+        }
+
+        function exportToCSV() {
+            const headers = ['Nome', 'Login', 'Andar', 'Ala', 'Mesa', 'Ramal', 'Patrimonio', 'Descricao', 'Data'];
+            const csvContent = [
+                headers.join(','),
+                ...tickets.map(ticket => headers.map(h => `"${ticket[h] || ''}"`).join(','))
+            ].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'chamados.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showSnackbar('📥 Dados exportados como CSV!', 'bg-blue-500');
+        }
+
+        function showSnackbar(message, bgColor) {
+            const snackbar = document.createElement('div');
+            snackbar.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg`;
+            snackbar.textContent = message;
+            document.body.appendChild(snackbar);
+            setTimeout(() => {
+                snackbar.remove();
+            }, 3000);
+        }
+
+        // Initial load
+        updateTable();
+        updateNotesView();
+    </script>
+</body>
+</html>
