@@ -18,7 +18,10 @@
         }
         .notes-container {
             max-height: 240px;
-            overflow-y: auto;
+            overflow-x: auto; /* Adiciona rolagem horizontal */
+            display: flex;
+            flex-wrap: wrap; /* Permite que as notas se ajustem em várias linhas */
+            gap: 10px; /* Espaço entre as notas */
         }
         .custom-input {
             border: 1px solid #9fa8da;
@@ -34,37 +37,66 @@
         .custom-textarea {
             resize: none;
         }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .form-container {
+            flex: 1;
+        }
+        .notes-section {
+            flex-basis: 300px;
+            max-width: 300px;
+        }
     </style>
 </head>
 <body class="flex justify-center items-center min-h-screen p-6">
-    <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8 flex flex-col space-y-6">
+    <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8">
         <!-- Title -->
         <h1 class="text-3xl font-bold text-center text-indigo-900">📋 Registro de Chamados de TI</h1>
 
-        <!-- Form -->
-        <div class="space-y-4">
-            <input id="nome" type="text" class="custom-input" placeholder="👤 Nome do Usuário">
-            <input id="login" type="text" class="custom-input" placeholder="🔐 Login">
-            <div class="flex space-x-4">
-                <input id="andar" type="text" class="custom-input w-1/2" placeholder="🏢 Andar">
-                <input id="ala" type="text" class="custom-input w-1/2" placeholder="📍 Ala">
+        <!-- Main Container: Form + Notes -->
+        <div class="container mt-6">
+            <!-- Form Container -->
+            <div class="form-container space-y-4">
+                <input id="login" type="text" class="custom-input" placeholder="🔐 Login">
+                <div class="flex space-x-4">
+                    <input id="andar" type="text" class="custom-input w-1/2" placeholder="🏢 Andar">
+                    <input id="ala" type="text" class="custom-input w-1/2" placeholder="📍 Ala">
+                </div>
+                <div class="flex space-x-4">
+                    <input id="mesa" type="text" class="custom-input w-1/2" placeholder="💺 Número da Mesa">
+                    <input id="ramal" type="text" class="custom-input w-1/2" placeholder="📞 Ramal">
+                </div>
+                <input id="patrimonio" type="text" class="custom-input" placeholder="💻 Patrimônio do Computador">
+                <textarea id="descricao" rows="3" class="custom-input custom-textarea" placeholder="📝 Descrição (opcional)"></textarea>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="saveData()" class="bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-800 flex items-center">
+                        <span class="material-icons">save</span> Salvar
+                    </button>
+                    <button onclick="clearFields()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+                        <span class="material-icons">clear</span> Limpar
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                        <span class="material-icons">file_download</span> Exportar CSV
+                    </button>
+                </div>
             </div>
-            <div class="flex space-x-4">
-                <input id="mesa" type="text" class="custom-input w-1/2" placeholder="💺 Número da Mesa">
-                <input id="ramal" type="text" class="custom-input w-1/2" placeholder="📞 Ramal">
-            </div>
-            <input id="patrimonio" type="text" class="custom-input" placeholder="💻 Patrimônio do Computador">
-            <textarea id="descricao" rows="3" class="custom-input custom-textarea" placeholder="📝 Descrição (opcional)"></textarea>
-            <div class="flex justify-center space-x-4">
-                <button onclick="saveData()" class="bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-800 flex items-center">
-                    <span class="material-icons">save</span> Salvar
-                </button>
-                <button onclick="clearFields()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
-                    <span class="material-icons">clear</span> Limpar
-                </button>
-                <button onclick="exportToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-                    <span class="material-icons">file_download</span> Exportar CSV
-                </button>
+
+            <!-- Notes Section -->
+            <div class="notes-section">
+                <h2 class="text-2xl font-bold text-indigo-900">📝 Notas Adesivas</h2>
+                <textarea id="nota" rows="3" class="custom-input custom-textarea mt-2" placeholder="📝 Nota Adesiva"></textarea>
+                <div class="flex justify-center space-x-4 mt-2">
+                    <button onclick="saveNote()" class="bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center">
+                        <span class="material-icons">save</span> Salvar Nota
+                    </button>
+                    <button onclick="clearNote()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+                        <span class="material-icons">clear</span> Limpar Nota
+                    </button>
+                </div>
+                <div id="notas-view" class="notes-container mt-2 bg-yellow-50 rounded-lg p-4 border border-yellow-200 shadow-yellow"></div>
             </div>
         </div>
 
@@ -75,7 +107,6 @@
                 <table id="tabela-chamados" class="w-full text-sm">
                     <thead class="bg-blue-200">
                         <tr class="text-indigo-900 font-bold">
-                            <th class="p-2">Nome</th>
                             <th class="p-2">Login</th>
                             <th class="p-2">Andar</th>
                             <th class="p-2">Ala</th>
@@ -90,21 +121,6 @@
                     <tbody id="tabela-body"></tbody>
                 </table>
             </div>
-        </div>
-
-        <!-- Sticky Notes -->
-        <div class="mt-6">
-            <h2 class="text-2xl font-bold text-indigo-900">📝 Notas Adesivas</h2>
-            <textarea id="nota" rows="3" class="custom-input custom-textarea mt-2" placeholder="📝 Nota Adesiva"></textarea>
-            <div class="flex justify-center space-x-4 mt-2">
-                <button onclick="saveNote()" class="bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center">
-                    <span class="material-icons">save</span> Salvar Nota
-                </button>
-                <button onclick="clearNote()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
-                    <span class="material-icons">clear</span> Limpar Nota
-                </button>
-            </div>
-            <div id="notas-view" class="notes-container mt-2 bg-yellow-50 rounded-lg p-4 border border-yellow-200 shadow-yellow"></div>
         </div>
     </div>
 
@@ -123,7 +139,6 @@
             tickets.forEach((ticket, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="p-2">${ticket.Nome}</td>
                     <td class="p-2">${ticket.Login}</td>
                     <td class="p-2">${ticket.Andar}</td>
                     <td class="p-2">${ticket.Ala}</td>
@@ -147,7 +162,6 @@
 
         function saveData() {
             const data = {
-                Nome: document.getElementById('nome').value,
                 Login: document.getElementById('login').value,
                 Andar: document.getElementById('andar').value,
                 Ala: document.getElementById('ala').value,
@@ -175,7 +189,6 @@
         function editData(index) {
             editIndex = index;
             const ticket = tickets[index];
-            document.getElementById('nome').value = ticket.Nome;
             document.getElementById('login').value = ticket.Login;
             document.getElementById('andar').value = ticket.Andar;
             document.getElementById('ala').value = ticket.Ala;
@@ -252,7 +265,7 @@
 
         function clearFields() {
             editIndex = null;
-            ['nome', 'login', 'andar', 'ala', 'mesa', 'ramal', 'patrimonio', 'descricao'].forEach(id => {
+            ['login', 'andar', 'ala', 'mesa', 'ramal', 'patrimonio', 'descricao'].forEach(id => {
                 document.getElementById(id).value = '';
             });
         }
@@ -263,33 +276,29 @@
         }
 
         function exportToCSV() {
-            const headers = ['Nome', 'Login', 'Andar', 'Ala', 'Mesa', 'Ramal', 'Patrimonio', 'Descricao', 'Data'];
+            const headers = ['Login', 'Andar', 'Ala', 'Mesa', 'Ramal', 'Patrimônio', 'Descrição', 'Data'];
+            const rows = tickets.map(ticket => [
+                ticket.Login, ticket.Andar, ticket.Ala, ticket.Mesa, ticket.Ramal, ticket.Patrimonio, ticket.Descricao, ticket.Data
+            ]);
             const csvContent = [
                 headers.join(','),
-                ...tickets.map(ticket => headers.map(h => `"${ticket[h] || ''}"`).join(','))
+                ...rows.map(row => row.join(','))
             ].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'chamados.csv');
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = 'tickets.csv';
             link.click();
-            document.body.removeChild(link);
-            showSnackbar('📥 Dados exportados como CSV!', 'bg-blue-500');
         }
 
         function showSnackbar(message, bgColor) {
             const snackbar = document.createElement('div');
-            snackbar.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg`;
+            snackbar.className = `snackbar fixed bottom-0 left-0 w-full bg-gray-900 text-white p-3 text-center ${bgColor}`;
             snackbar.textContent = message;
             document.body.appendChild(snackbar);
-            setTimeout(() => {
-                snackbar.remove();
-            }, 3000);
+            setTimeout(() => snackbar.remove(), 3000);
         }
 
-        // Initial load
         updateTable();
         updateNotesView();
     </script>
