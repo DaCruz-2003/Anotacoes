@@ -1,319 +1,712 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coleta de Dados - TI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #e8eaf6;
-        }
-        .shadow-yellow {
-            box-shadow: 2px 2px 8px rgba(255, 235, 59, 0.5);
-        }
-        .table-container {
-            max-height: 280px;
-            overflow-y: auto;
-        }
-        .notes-container {
-            max-height: 240px;
-            overflow-x: auto; /* Adiciona rolagem horizontal */
-            display: flex;
-            flex-wrap: wrap; /* Permite que as notas se ajustem em várias linhas */
-            gap: 10px; /* Espaço entre as notas */
-        }
-        .custom-input {
-            border: 1px solid #9fa8da;
-            border-radius: 8px;
-            padding: 8px;
-            background-color: #ffffff;
-            width: 100%;
-        }
-        .custom-input:focus {
-            outline: none;
-            border-color: #3949ab;
-        }
-        .custom-textarea {
-            resize: none;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-        .form-container {
-            flex: 1;
-        }
-        .notes-section {
-            flex-basis: 300px;
-            max-width: 300px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DELEVE</title>
+  <link rel="icon" href="favicon-16x16.png" type="image/x-icon" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #e8eaf6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background-color: #2d3748;
+      color: #d1d5db;
+    }
+
+    .shadow-yellow {
+      box-shadow: 2px 2px 8px rgba(255, 235, 59, 0.5);
+    }
+
+    .table-container {
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .notes-container {
+      max-height: 240px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 8px;
+    }
+
+    .note-card {
+      background-color: #fef9c3;
+      border: 1px solid #facc15;
+      border-radius: 6px;
+      padding: 10px;
+      box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+      transform: rotate(1deg);
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .note-card:nth-child(even) {
+      transform: rotate(-1deg);
+    }
+
+    .note-card:hover {
+      transform: scale(1.05) rotate(0deg);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .note-card p {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin: 8px 0 0;
+      word-break: break-word;
+    }
+
+    .note-card .timestamp {
+      font-size: 0.75rem;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .note-card .timestamp[title]:hover {
+      cursor: default;
+    }
+
+    .dark-mode .note-card {
+      background-color: #d97706;
+      border-color: #b45309;
+      box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark-mode .note-card .timestamp {
+      color: #d1d5db;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) rotate(1deg);
+      }
+
+      to {
+        opacity: 1;
+        transform: rotate(1deg);
+      }
+    }
+
+    .notes-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .notes-container::-webkit-scrollbar-track {
+      background: #f3f4f6;
+      border-radius: 4px;
+    }
+
+    .notes-container::-webkit-scrollbar-thumb {
+      background: #9ca3af;
+      border-radius: 4px;
+    }
+
+    .dark-mode .notes-container::-webkit-scrollbar-track {
+      background: #374151;
+    }
+
+    .dark-mode .notes-container::-webkit-scrollbar-thumb {
+      background: #6b7280;
+    }
+
+    .custom-input {
+      border: 1px solid #9fa8da;
+      border-radius: 8px;
+      padding: 8px;
+      background-color: #ffffff;
+      width: 100%;
+    }
+
+    .dark-mode .custom-input {
+      background-color: #4a5568;
+      border-color: #718096;
+      color: #e2e8f0;
+    }
+
+    .custom-input:focus {
+      outline: none;
+      border-color: #3949ab;
+    }
+
+    .dark-mode .custom-input:focus {
+      border-color: #63b3ed;
+    }
+
+    .custom-textarea {
+      resize: none;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .form-container {
+      flex: 1;
+    }
+
+    .notes-section {
+      flex-basis: 320px;
+      max-width: 320px;
+    }
+
+    .dark-mode .bg-white {
+      background-color: #3a4657;
+    }
+
+    .dark-mode .bg-indigo-100 {
+      background-color: #4c5a7a;
+    }
+
+    .dark-mode .bg-blue-200 {
+      background-color: #5a6b8f;
+    }
+
+    .dark-mode .bg-yellow-50 {
+      background-color: #4b3d2b;
+      border-color: #6b4e31;
+    }
+
+    .dark-mode .bg-yellow-100 {
+      background-color: #8b6a47;
+    }
+
+    .dark-mode .border-yellow-200 {
+      border-color: #8b6a47;
+    }
+
+    .dark-mode .border-yellow-300 {
+      border-color: #6b4e31;
+    }
+
+    .dark-mode .text-indigo-900 {
+      color: #a3bffa;
+    }
+
+    .dark-mode .text-gray-600 {
+      color: #b0b7c3;
+    }
+
+    .dark-mode .bg-gray-900 {
+      background-color: #2d3748;
+    }
+
+    .dark-mode .shadow-inner {
+      background-color: #3a4657;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .dark-mode .text-white {
+      color: #e2e8f0;
+    }
+
+    .dark-mode .text-gray-800 {
+      color: #d1d5db;
+    }
+
+    .dark-mode .bg-indigo-700 {
+      background-color: #4f659e;
+    }
+
+    .dark-mode .bg-indigo-800 {
+      background-color: #5b76b5;
+    }
+
+    .dark-mode .bg-gray-500 {
+      background-color: #5a667a;
+    }
+
+    .dark-mode .bg-gray-600 {
+      background-color: #6b7a93;
+    }
+
+    .dark-mode .bg-blue-600 {
+      background-color: #4a779e;
+    }
+
+    .dark-mode .bg-blue-700 {
+      background-color: #5889b5;
+    }
+
+    .dark-mode .bg-yellow-400 {
+      background-color: #b08968;
+    }
+
+    .dark-mode .bg-yellow-500 {
+      background-color: #c79e7a;
+    }
+
+    .dark-mode .text-blue-600 {
+      color: #63b3ed;
+    }
+
+    .dark-mode .text-blue-800 {
+      color: #7fb9ed;
+    }
+
+    .dark-mode .text-red-600 {
+      color: #f56565;
+    }
+
+    .dark-mode .text-red-800 {
+      color: #f87171;
+    }
+
+    .dark-mode .bg-green-500 {
+      background-color: #48bb78;
+    }
+
+    .dark-mode .bg-blue-500 {
+      background-color: #4299e1;
+    }
+
+    .dark-mode .bg-red-500 {
+      background-color: #f56565;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+    }
+
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .sortable-header:hover {
+      background-color: rgba(159, 168, 218, 0.3);
+    }
+
+    .sort-arrow {
+      font-size: 18px;
+      transition: transform 0.2s, opacity 0.2s;
+      opacity: 0.5;
+    }
+
+    .sortable-header:hover .sort-arrow {
+      opacity: 1;
+    }
+
+    .sort-arrow.active {
+      opacity: 1;
+      color: #3949ab;
+    }
+
+    .dark-mode .sort-arrow.active {
+      color: #63b3ed;
+    }
+
+    .sort-arrow.asc {
+      transform: rotate(180deg);
+    }
+  </style>
 </head>
+
 <body class="flex justify-center items-center min-h-screen p-6">
-    <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8">
-        <!-- Title -->
-        <h1 class="text-3xl font-bold text-center text-indigo-900">📋 Registro de Chamados de TI</h1>
+  <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8 relative">
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle"
+      class="theme-toggle bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 flex items-center">
+      <span id="theme-icon" class="material-icons">brightness_6</span>
+    </button>
+    <!-- Title -->
+    <h1 class="text-3xl font-bold text-center text-indigo-900">📋 DELEVE TI</h1>
 
-        <!-- Main Container: Form + Notes -->
-        <div class="container mt-6">
-            <!-- Form Container -->
-            <div class="form-container space-y-4">
-                <input id="login" type="text" class="custom-input" placeholder="🔐 Login">
-                <div class="flex space-x-4">
-                    <input id="andar" type="text" class="custom-input w-1/2" placeholder="🏢 Andar">
-                    <input id="ala" type="text" class="custom-input w-1/2" placeholder="📍 Ala">
-                </div>
-                <div class="flex space-x-4">
-                    <input id="mesa" type="text" class="custom-input w-1/2" placeholder="💺 Número da Mesa">
-                    <input id="ramal" type="text" class="custom-input w-1/2" placeholder="📞 Ramal">
-                </div>
-                <input id="patrimonio" type="text" class="custom-input" placeholder="💻 Patrimônio do Computador">
-                <textarea id="descricao" rows="3" class="custom-input custom-textarea" placeholder="📝 Descrição (opcional)"></textarea>
-                <div class="flex justify-center space-x-4">
-                    <button onclick="saveData()" class="bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-800 flex items-center">
-                        <span class="material-icons">save</span> Salvar
-                    </button>
-                    <button onclick="clearFields()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
-                        <span class="material-icons">clear</span> Limpar
-                    </button>
-                    <button onclick="exportToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-                        <span class="material-icons">file_download</span> Exportar CSV
-                    </button>
-                </div>
-            </div>
-
-            <!-- Notes Section -->
-            <div class="notes-section">
-                <h2 class="text-2xl font-bold text-indigo-900">📝 Notas Adesivas</h2>
-                <textarea id="nota" rows="3" class="custom-input custom-textarea mt-2" placeholder="📝 Nota Adesiva"></textarea>
-                <div class="flex justify-center space-x-4 mt-2">
-                    <button onclick="saveNote()" class="bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center">
-                        <span class="material-icons">save</span> Salvar Nota
-                    </button>
-                    <button onclick="clearNote()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
-                        <span class="material-icons">clear</span> Limpar Nota
-                    </button>
-                </div>
-                <div id="notas-view" class="notes-container mt-2 bg-yellow-50 rounded-lg p-4 border border-yellow-200 shadow-yellow"></div>
-            </div>
+    <!-- Main Container: Form + Notes -->
+    <div class="container mt-6">
+      <!-- Form Container -->
+      <div class="form-container space-y-4">
+        <input id="login" type="text" class="custom-input" placeholder="🔐 Login" />
+        <div class="flex space-x-4">
+          <input id="andar" type="text" class="custom-input w-1/2" placeholder="🏢 Andar" />
+          <input id="ala" type="text" class="custom-input w-1/2" placeholder="📍 Ala" />
         </div>
-
-        <!-- Tickets Table -->
-        <div class="mt-6">
-            <h2 class="text-2xl font-bold text-indigo-900">📊 Chamados Registrados</h2>
-            <div class="table-container mt-2 bg-indigo-100 rounded-lg p-4">
-                <table id="tabela-chamados" class="w-full text-sm">
-                    <thead class="bg-blue-200">
-                        <tr class="text-indigo-900 font-bold">
-                            <th class="p-2">Login</th>
-                            <th class="p-2">Andar</th>
-                            <th class="p-2">Ala</th>
-                            <th class="p-2">Mesa</th>
-                            <th class="p-2">Ramal</th>
-                            <th class="p-2">Patrimônio</th>
-                            <th class="p-2">Descrição</th>
-                            <th class="p-2">Data</th>
-                            <th class="p-2">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-body"></tbody>
-                </table>
-            </div>
+        <div class="flex space-x-4">
+          <input id="mesa" type="text" class="custom-input w-1/2" placeholder="💺 Número da Mesa" />
+          <input id="ramal" type="text" class="custom-input w-1/2" placeholder="📞 Ramal" />
         </div>
+        <input id="patrimonio" type="text" class="custom-input" placeholder="💻 Patrimônio do Computador" />
+        <textarea id="descricao" rows="3" class="custom-input custom-textarea" placeholder="📝 Descrição"></textarea>
+        <div class="flex justify-center space-x-4">
+          <button onclick="saveData()" class="bg-indigo-700 text-white px-4 py-2 rounded-lg hover:bg-indigo-800 flex items-center">
+            <span class="material-icons">save</span> Salvar
+          </button>
+          <button onclick="clearFields()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+            <span class="material-icons">clear</span> Limpar
+          </button>
+          <button onclick="exportToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+            <span class="material-icons">file_download</span> Exportar Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Notes Section -->
+      <div class="notes-section">
+        <h2 class="text-2xl font-bold text-indigo-900">📝 Notas Adesivas</h2>
+        <textarea id="nota" rows="3" class="custom-input custom-textarea mt-2" placeholder="📝 Nota Adesiva"></textarea>
+        <div class="flex justify-center space-x-4 mt-2">
+          <button onclick="saveNote()"
+            class="bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center">
+            <span class="material-icons">save</span> Salvar Nota
+          </button>
+          <button onclick="clearNote()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center">
+            <span class="material-icons">clear</span> Limpar Nota
+          </button>
+        </div>
+        <div id="notas-view"
+          class="notes-container mt-2 bg-yellow-50 rounded-lg p-4 border border-yellow-200 shadow-yellow"></div>
+      </div>
     </div>
-    
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <script>
-        let editIndex = null;
-        let editNoteIndex = null;
-        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    <!-- Tickets Table -->
+    <div class="mt-6">
+      <h2 class="text-2xl font-bold text-indigo-900">📊 Chamados Registrados</h2>
+      <div class="table-container mt-2 bg-indigo-100 rounded-lg p-4">
+        <table id="tabela-chamados" class="w-full text-sm">
+          <thead class="bg-blue-200">
+            <tr class="text-indigo-900 font-bold">
+              <th class="p-2">Login</th>
+              <th class="p-2">Localização</th>
+              <th class="p-2">Ramal</th>
+              <th class="p-2">Patrimônio</th>
+              <th class="p-2">Descrição</th>
+              <th class="p-2 sortable-header" id="header-data" title="Clique para ordenar">
+                Data
+                <span id="sort-arrow" class="material-icons sort-arrow active">arrow_downward</span>
+              </th>
+              <th class="p-2">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        function updateTable() {
-            const tbody = document.getElementById('tabela-body');
-            tbody.innerHTML = '';
-            tickets.forEach((ticket, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="p-2">${ticket.Login}</td>
-                    <td class="p-2">${ticket.Andar}</td>
-                    <td class="p-2">${ticket.Ala}</td>
-                    <td class="p-2">${ticket.Mesa}</td>
-                    <td class="p-2">${ticket.Ramal}</td>
-                    <td class="p-2">${ticket.Patrimonio}</td>
-                    <td class="p-2">${ticket.Descricao}</td>
-                    <td class="p-2">${ticket.Data}</td>
-                    <td class="p-2 flex space-x-2">
-                        <button onclick="editData(${index})" class="text-blue-600 hover:text-blue-800" title="Editar chamado">
-                            <span class="material-icons">edit</span>
-                        </button>
-                        <button onclick="deleteData(${index})" class="text-red-600 hover:text-red-800" title="Excluir chamado">
-                            <span class="material-icons">delete</span>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-        function saveData() {
-            const data = {
-                Login: document.getElementById('login').value,
-                Andar: document.getElementById('andar').value,
-                Ala: document.getElementById('ala').value,
-                Mesa: document.getElementById('mesa').value,
-                Ramal: document.getElementById('ramal').value,
-                Patrimonio: document.getElementById('patrimonio').value,
-                Descricao: document.getElementById('descricao').value,
-                Data: new Date().toLocaleString('pt-BR')
-            };
+  <script>
+    let editIndex = null;
+    let editNoteIndex = null;
+    let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let sortDescending = true; // Ordena da data mais recente para a mais antiga inicialmente
 
-            if (editIndex === null) {
-                tickets.push(data);
-                showSnackbar('✅ Dados salvos com sucesso!', 'bg-green-500');
-            } else {
-                tickets[editIndex] = data;
-                showSnackbar('✏️ Dados atualizados com sucesso!', 'bg-green-500');
-                editIndex = null;
-            }
+    // Função melhorada para converter string "dd/mm/yyyy, hh:mm:ss" para Date
+    function parsePtBrDateTime(str) {
+      const [datePart, timePart = "00:00:00"] = str.split(", ");
+      const [day, month, year] = datePart.split("/");
+      const [hours = "00", minutes = "00", seconds = "00"] = timePart.split(":");
+      return new Date(`${year}-${month}-${day}T${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`);
+    }
 
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-            updateTable();
-            clearFields();
-        }
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const body = document.body;
+    const headerData = document.getElementById('header-data');
+    const sortArrow = document.getElementById('sort-arrow');
 
-        function editData(index) {
-            editIndex = index;
-            const ticket = tickets[index];
-            document.getElementById('login').value = ticket.Login;
-            document.getElementById('andar').value = ticket.Andar;
-            document.getElementById('ala').value = ticket.Ala;
-            document.getElementById('mesa').value = ticket.Mesa;
-            document.getElementById('ramal').value = ticket.Ramal;
-            document.getElementById('patrimonio').value = ticket.Patrimonio;
-            document.getElementById('descricao').value = ticket.Descricao;
-            showSnackbar(`✏️ Editando registro ${index}`, 'bg-blue-500');
-        }
+    // Verificar tema salvo
+    if (localStorage.getItem('theme') === 'dark') {
+      body.classList.add('dark-mode');
+      themeIcon.textContent = 'brightness_7';
+    } else {
+      themeIcon.textContent = 'brightness_6';
+    }
 
-        function deleteData(index) {
-            tickets.splice(index, 1);
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-            updateTable();
-            showSnackbar(`🗑️ Registro ${index} excluído com sucesso!`, 'bg-red-500');
-        }
+    // Alternar tema claro/escuro
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      if (body.classList.contains('dark-mode')) {
+        themeIcon.textContent = 'brightness_7';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeIcon.textContent = 'brightness_6';
+        localStorage.setItem('theme', 'light');
+      }
+    });
 
-        function updateNotesView() {
-            const notesView = document.getElementById('notas-view');
-            notesView.innerHTML = '';
-            notes.slice().reverse().forEach((note, idx) => {
-                const actualIdx = notes.length - 1 - idx;
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'bg-yellow-100 p-3 rounded-lg mb-2 border border-yellow-300';
-                noteDiv.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-600">${note.timestamp}</span>
-                        <div class="flex space-x-2">
-                            <button onclick="editNote(${actualIdx})" class="text-blue-600 hover:text-blue-800" title="Editar nota">
-                                <span class="material-icons">edit</span>
-                            </button>
-                            <button onclick="deleteNote(${actualIdx})" class="text-red-600 hover:text-red-800" title="Excluir nota">
-                                <span class="material-icons">delete</span>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm">${note.text}</p>
-                `;
-                notesView.appendChild(noteDiv);
-            });
-        }
+    // Ordenar tabela por data
+    headerData.addEventListener('click', () => {
+      sortDescending = !sortDescending;
+      updateSortArrow();
+      updateTable();
+    });
 
-        function saveNote() {
-            const noteText = document.getElementById('nota').value.trim();
-            if (!noteText) {
-                showSnackbar('⚠️ O campo de nota está vazio.', 'bg-red-500');
-                return;
-            }
-            if (editNoteIndex === null) {
-                notes.push({ timestamp: new Date().toLocaleString('pt-BR'), text: noteText });
-                showSnackbar('✅ Nota salva com sucesso!', 'bg-green-500');
-            } else {
-                notes[editNoteIndex].text = noteText;
-                showSnackbar('✏️ Nota atualizada com sucesso!', 'bg-green-500');
-                editNoteIndex = null;
-            }
-            localStorage.setItem('notes', JSON.stringify(notes));
-            updateNotesView();
-            clearNote();
-        }
+    // Atualizar ícone de ordenação
+    function updateSortArrow() {
+      if (sortDescending) {
+        sortArrow.textContent = 'arrow_downward';
+        sortArrow.classList.remove('asc');
+      } else {
+        sortArrow.textContent = 'arrow_upward';
+        sortArrow.classList.add('asc');
+      }
+    }
 
-        function editNote(index) {
-            editNoteIndex = index;
-            document.getElementById('nota').value = notes[index].text;
-            showSnackbar(`✏️ Editando nota criada em ${notes[index].timestamp}`, 'bg-blue-500');
-        }
+    // Atualizar tabela com dados ordenados
+    function updateTable() {
+      const tbody = document.getElementById('tabela-body');
+      tbody.innerHTML = '';
 
-        function deleteNote(index) {
-            notes.splice(index, 1);
-            localStorage.setItem('notes', JSON.stringify(notes));
-            updateNotesView();
-            showSnackbar('🗑️ Nota excluída com sucesso!', 'bg-red-500');
-        }
+      // Ordenar tickets pela data
+      tickets.sort((a, b) => {
+        const dateA = parsePtBrDateTime(a.Data);
+        const dateB = parsePtBrDateTime(b.Data);
+        return sortDescending ? dateB - dateA : dateA - dateB;
+      });
 
-        function clearFields() {
-            editIndex = null;
-            ['login', 'andar', 'ala', 'mesa', 'ramal', 'patrimonio', 'descricao'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-        }
+      // Preencher tabela com dados ordenados
+      tickets.forEach((ticket, index) => {
+        const row = document.createElement('tr');
 
-        function clearNote() {
-            editNoteIndex = null;
-            document.getElementById('nota').value = '';
-        }
+        // Criar botões de ação
+        const actionsTd = document.createElement('td');
+        actionsTd.className = 'p-2 flex space-x-2';
 
-        function exportToCSV() {
-            const headers = ['Login', 'Andar', 'Ala', 'Mesa', 'Ramal', 'Patrimônio', 'Descrição', 'Data'];
-            const rows = tickets.map(ticket => [
-                ticket.Login, ticket.Andar, ticket.Ala, ticket.Mesa, ticket.Ramal, ticket.Patrimonio, ticket.Descricao, ticket.Data
-            ]);
-            const csvContent = [
-                headers.join(','),
-                ...rows.map(row => row.join(','))
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'tickets.csv';
-            link.click();
-        }
+        const editBtn = document.createElement('button');
+        editBtn.className = 'text-blue-600 hover:text-blue-800';
+        editBtn.title = 'Editar chamado';
+        editBtn.setAttribute('aria-label', 'Editar chamado');
+        editBtn.innerHTML = `<span class="material-icons">edit</span>`;
+        editBtn.addEventListener('click', () => editData(index));
 
-        function showSnackbar(message, bgColor) {
-            const snackbar = document.createElement('div');
-            snackbar.className = `snackbar fixed bottom-0 left-0 w-full bg-gray-900 text-white p-3 text-center ${bgColor}`;
-            snackbar.textContent = message;
-            document.body.appendChild(snackbar);
-            setTimeout(() => snackbar.remove(), 3000);
-        }
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-red-600 hover:text-red-800';
+        deleteBtn.title = 'Excluir chamado';
+        deleteBtn.setAttribute('aria-label', 'Excluir chamado');
+        deleteBtn.innerHTML = `<span class="material-icons">delete</span>`;
+        deleteBtn.addEventListener('click', () => deleteData(index));
 
+        actionsTd.appendChild(editBtn);
+        actionsTd.appendChild(deleteBtn);
+
+        // Preencher linha da tabela
+        row.innerHTML = `
+          <td class="p-2">${ticket.Login}</td>
+          <td class="p-2">Andar: ${ticket.Andar}° // Ala: ${ticket.Ala} // Mesa: ${ticket.Mesa}</td>
+          <td class="p-2">${ticket.Ramal}</td>
+          <td class="p-2">${ticket.Patrimonio}</td>
+          <td class="p-2">${ticket.Descricao}</td>
+          <td class="p-2">${ticket.Data}</td>
+        `;
+
+        row.appendChild(actionsTd);
+        tbody.appendChild(row);
+      });
+    }
+
+    // Salvar dados do formulário
+    function saveData() {
+      const data = {
+        Login: document.getElementById('login').value,
+        Andar: document.getElementById('andar').value,
+        Ala: document.getElementById('ala').value,
+        Mesa: document.getElementById('mesa').value,
+        Ramal: document.getElementById('ramal').value,
+        Patrimonio: document.getElementById('patrimonio').value,
+        Descricao: document.getElementById('descricao').value,
+        Data: new Date().toLocaleString('pt-BR')
+      };
+
+      if (editIndex === null) {
+        tickets.push(data);
+        showSnackbar('✅ Dados salvos com sucesso!', 'bg-green-500');
+      } else {
+        tickets[editIndex] = data;
+        showSnackbar('✏️ Dados atualizados com sucesso!', 'bg-green-500');
+        editIndex = null;
+      }
+
+      localStorage.setItem('tickets', JSON.stringify(tickets));
+      updateTable();
+      clearFields();
+    }
+
+    // Editar dados existentes
+    function editData(index) {
+      editIndex = index;
+      const ticket = tickets[index];
+      document.getElementById('login').value = ticket.Login;
+      document.getElementById('andar').value = ticket.Andar;
+      document.getElementById('ala').value = ticket.Ala;
+      document.getElementById('mesa').value = ticket.Mesa;
+      document.getElementById('ramal').value = ticket.Ramal;
+      document.getElementById('patrimonio').value = ticket.Patrimonio;
+      document.getElementById('descricao').value = ticket.Descricao;
+      showSnackbar('✏️ Editando registro ' + index, 'bg-blue-500');
+    }
+
+    // Excluir dados
+    function deleteData(index) {
+      if (confirm('Tem certeza que deseja excluir este registro?')) {
+        tickets.splice(index, 1);
+        localStorage.setItem('tickets', JSON.stringify(tickets));
         updateTable();
+        showSnackbar('🗑️ Registro excluído com sucesso!', 'bg-red-500');
+      }
+    }
+
+    // Atualizar visualização de notas
+    function updateNotesView() {
+      const notesView = document.getElementById('notas-view');
+      notesView.innerHTML = '';
+      
+      // Mostrar notas mais recentes primeiro
+      notes.slice().reverse().forEach((note, idx) => {
+        const actualIdx = notes.length - 1 - idx;
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-card';
+        const shortTimestamp = note.timestamp.replace(/, (\d{2}:\d{2}):\d{2}/, ' $1');
+        
+        noteDiv.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <span class="timestamp" title="${note.timestamp}">${shortTimestamp}</span>
+            <div class="flex space-x-2">
+              <button onclick="editNote(${actualIdx})" class="text-blue-600 hover:text-blue-800" title="Editar nota" aria-label="Editar nota">
+                <span class="material-icons">edit</span>
+              </button>
+              <button onclick="deleteNote(${actualIdx})" class="text-red-600 hover:text-red-800" title="Excluir nota" aria-label="Excluir nota">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+          <p>${note.text}</p>
+        `;
+        
+        notesView.appendChild(noteDiv);
+      });
+    }
+
+    // Salvar nota
+    function saveNote() {
+      const noteText = document.getElementById('nota').value.trim();
+      if (!noteText) {
+        showSnackbar('⚠️ O campo de nota está vazio.', 'bg-red-500');
+        return;
+      }
+      
+      if (editNoteIndex === null) {
+        notes.push({
+          timestamp: new Date().toLocaleString('pt-BR'),
+          text: noteText
+        });
+        showSnackbar('✅ Nota salva com sucesso!', 'bg-green-500');
+      } else {
+        notes[editNoteIndex].text = noteText;
+        showSnackbar('✏️ Nota atualizada com sucesso!', 'bg-green-500');
+        editNoteIndex = null;
+      }
+      
+      localStorage.setItem('notes', JSON.stringify(notes));
+      updateNotesView();
+      clearNote();
+    }
+
+    // Editar nota
+    function editNote(index) {
+      editNoteIndex = index;
+      document.getElementById('nota').value = notes[index].text;
+      showSnackbar('✏️ Editando nota criada em ' + notes[index].timestamp, 'bg-blue-500');
+    }
+
+    // Excluir nota
+    function deleteNote(index) {
+      if (confirm('Tem certeza que deseja excluir esta nota?')) {
+        notes.splice(index, 1);
+        localStorage.setItem('notes', JSON.stringify(notes));
         updateNotesView();
-    </script>
+        showSnackbar('🗑️ Nota excluída com sucesso!', 'bg-red-500');
+      }
+    }
 
-</script>
+    // Limpar campos do formulário
+    function clearFields() {
+      editIndex = null;
+      ['login', 'andar', 'ala', 'mesa', 'ramal', 'patrimonio', 'descricao'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+    }
 
-<footer class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 text-center text-sm text-gray-600 py-2 shadow-inner">
-    © 2025 Desenvolvido por 
-    <a href="https://github.com/dasnovais" target="_blank" class="text-indigo-700 hover:underline">@dasnovais</a>, 
-    <a href="https://github.com/eovitt" target="_blank" class="text-indigo-700 hover:underline">@vpgquintanilha</a> e 
-    <a href="https://github.com/DaCruz-2003" target="_blank" class="text-indigo-700 hover:underline">@lhcruz</a>.
-</footer>
+    // Limpar campo de nota
+    function clearNote() {
+      editNoteIndex = null;
+      document.getElementById('nota').value = '';
+    }
 
+    // Exportar para CSV
+    function exportToCSV() {
+      if (tickets.length === 0) {
+        showSnackbar('⚠️ Nenhum dado para exportar.', 'bg-red-500');
+        return;
+      }
+      
+      const headers = ['Login', 'Andar', 'Ala', 'Mesa', 'Ramal', 'Patrimônio', 'Descrição', 'Data'];
+      const rows = tickets.map(ticket => [
+        ticket.Login, 
+        ticket.Andar, 
+        ticket.Ala, 
+        ticket.Mesa, 
+        ticket.Ramal, 
+        ticket.Patrimonio, 
+        ticket.Descricao,
+        ticket.Data
+      ]);
+      
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(item => `"${item}"`).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `chamados_${new Date().toLocaleDateString('pt-BR')}.csv`;
+      link.click();
+    }
+
+    // Mostrar mensagem flutuante
+    function showSnackbar(message, bgColor) {
+      const snackbar = document.createElement('div');
+      snackbar.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white ${bgColor} shadow-lg`;
+      snackbar.textContent = message;
+      document.body.appendChild(snackbar);
+      setTimeout(() => snackbar.remove(), 3000);
+    }
+
+    // Inicializar página
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSortArrow();
+      updateTable();
+      updateNotesView();
+    });
+  </script>
+
+  <footer
+    class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 text-center text-sm text-gray-600 py-2 shadow-inner dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+    © 2025 Desenvolvido por
+    <a href="https://github.com/dasnovais" target="_blank" class="text-indigo-700 hover:underline dark:text-indigo-400">@dasnovais</a>,
+    <a href="https://github.com/eovitt" target="_blank" class="text-indigo-700 hover:underline dark:text-indigo-400">@vpgquintanilha</a> e
+    <a href="https://github.com/DaCruz-2003" target="_blank" class="text-indigo-700 hover:underline dark:text-indigo-400">@lhcruz</a>.
+  </footer>
 </body>
-</html>
 
-</footer>
-</body>
 </html>
